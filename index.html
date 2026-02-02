@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ArAi Mobile App</title>
+    
+    <!-- Inter Fontu (Medium 500) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        
+        /* FONT AYARI: Tüm elementler için Inter Medium zorunlu kılındı */
+        body, html, button, input, textarea, div, p, h1, h2, h3, span, li {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+        }
+
+        body, html {
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .safe-top { padding-top: var(--safe-top); }
+        .safe-bottom { padding-bottom: var(--safe-bottom); }
+
+        /* Mesaj Balonları */
+        .message-user {
+            background-color: #2563eb; 
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-ai {
+            background-color: #f1f5f9; 
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-indicator {
+            font-style: italic;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .hidden { display: none !important; }
+
+        .logo-header {
+            height: 65px;
+            width: auto;
+            display: block;
+        }
+
+        /* Klavye yönetimi için ana kapsayıcı */
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            background: white;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <!-- HEADER -->
+        <header class="safe-top bg-white px-2 py-2 flex items-center justify-between shrink-0 z-10 shadow-sm border-b border-slate-50">
+            <!-- Sol Logo -->
+            <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/arailogonew.png" alt="ArAi Logo" class="logo-header">
+            
+            <!-- Sağ Ayarlar Butonu -->
+            <button onclick="openSettings()" class="p-2 active:scale-90 transition-transform mr-1">
+                <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/settings.png" alt="Ayarlar" class="w-8 h-8 object-contain">
+            </button>
+        </header>
+
+        <!-- 1. EKRAN: KARŞILAMA -->
+        <main id="welcome-screen" class="flex-1 flex flex-col items-center justify-center px-8 text-center">
+            <h1 class="text-4xl font-bold text-slate-900 mb-4">ArAi'a Hoşgeldin</h1>
+            <p class="text-slate-500 text-xl mb-12">Hangi konudan bahsetmek istersin?</p>
+            <button onclick="startChat()" class="w-full max-w-xs bg-blue-600 text-white py-5 rounded-2xl shadow-lg active:scale-95 transition-all text-xl mb-8">
+                Sohbete Başla
+            </button>
+
+            <!-- AYDINLATMA METNİ BUTONU -->
+            <button onclick="openPrivacy()" class="text-slate-400 text-xs border-b border-slate-300 pb-0.5 hover:text-slate-600 transition-colors mt-4">
+                Aydınlatma Metni
+            </button>
+        </main>
+
+        <!-- 2. EKRAN: SOHBET -->
+        <main id="chat-screen" class="flex-1 flex flex-col hidden overflow-hidden">
+            <!-- Mesaj Alanı -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 flex flex-col">
+                <div class="flex justify-start">
+                    <div class="message-ai max-w-[85%] p-3 px-4 rounded-2xl text-base">
+                        Merhaba! Ben ArAi. Hangi konudan bahsetmek istersin?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Alanı -->
+            <footer id="chat-footer" class="bg-white px-3 py-3 border-t border-slate-100 shrink-0">
+                <div class="flex items-center gap-2">
+                    <!-- Mesaj Kutusu -->
+                    <input type="text" id="user-input" placeholder="Mesajınızı yazın..." autocomplete="off"
+                           class="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 outline-none focus:border-blue-500 transition-colors text-base">
+                    
+                    <!-- Buton -->
+                    <button onclick="sendMessage()" class="w-12 h-12 flex items-center justify-center rounded-full active:scale-90 transition-all shrink-0">
+                        <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/sendbutton.png" alt="Send" class="w-full h-full object-contain">
+                    </button>
+                </div>
+                
+                <!-- UYARI METNİ -->
+                <div class="text-center mt-2">
+                    <p class="text-[11px] text-slate-400 select-none">! ArAi Beta, hata yapabilir.</p>
+                </div>
+
+                <div class="safe-bottom"></div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- AYARLAR PANELİ (SAĞDAN KAYARAK GELİR) -->
+    <div id="settings-panel" class="fixed inset-0 z-50 bg-white transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
+        <!-- Ayarlar Header -->
+        <header class="safe-top bg-white px-4 py-4 flex items-center border-b border-slate-100 shrink-0">
+            <button onclick="closeSettings()" class="p-2 -ml-2 mr-2 active:scale-90 transition-transform text-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <h2 class="text-xl font-bold text-slate-900">Ayarlar</h2>
+        </header>
+
+        <!-- Ayarlar İçerik -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div class="space-y-4">
+                <button onclick="checkUpdates()" id="update-btn" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 active:bg-slate-200 transition-colors">
+                    <span class="text-slate-700 text-sm whitespace-nowrap">Güncellemeleri Denetle</span>
+                    <span id="update-status" class="hidden text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full whitespace-nowrap">GÜNCEL</span>
+                </button>
+            </div>
+
+            <!-- Version Info -->
+            <div class="mt-12 text-center">
+                 <p class="text-slate-300 text-sm">v1.0.0 Beta</p>
+                 <p class="text-[10px] text-slate-200 mt-1">ArAi Technologies</p>
+            </div>
+        </div>
+        
+        <div class="safe-bottom"></div>
+    </div>
+
+    <!-- AYDINLATMA METNİ PANELİ (AŞAĞIDAN YUKARI) -->
+    <div id="privacy-panel" class="fixed inset-0 z-50 bg-white transform translate-y-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
+        <!-- Header -->
+        <header class="safe-top bg-white px-4 py-4 flex items-center justify-between border-b border-slate-100 shrink-0">
+            <h2 class="text-xl font-bold text-slate-900 ml-2">Aydınlatma Metni</h2>
+            <button onclick="closePrivacy()" class="p-2 active:scale-90 transition-transform text-slate-600 bg-slate-100 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </header>
+
+        <!-- İçerik -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div class="space-y-6 text-slate-600 text-sm leading-relaxed">
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                    <h3 class="text-blue-800 font-bold text-base mb-2">Veri Gizliliği ve Güvenlik</h3>
+                    <p class="text-blue-700 text-xs">ArAi, kullanıcı gizliliğini en üst düzeyde tutmayı taahhüt eder.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-slate-900 font-bold mb-2">Veri Saklama</h3>
+                    <p>ArAi üzerindeki sohbetleriniz <strong>hiçbir şekilde sunucularımızda barındırılmaz</strong>. Tüm mesajlaşma geçmişiniz ve verileriniz, yalnızca kullanmakta olduğunuz cihazın geçici önbelleğinde (cache) tutulur.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-slate-900 font-bold mb-2">Erişim ve Paylaşım</h3>
+                    <p>Verileriniz tamamen size aittir. Uygulamayı kapattığınızda veya önbelleği temizlediğinizde veriler silinebilir. Siz manuel olarak paylaşmadığınız sürece, sohbet içeriklerinizi kimse göremez ve üçüncü şahıslarla paylaşılamaz.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-slate-900 font-bold mb-2">Altyapı</h3>
+                    <p>Uygulamamız, güvenli ve hızlı bir deneyim sunmak amacıyla <strong>Google altyapıları</strong> (Gemini API) ve teknolojileri kullanılarak geliştirilmiştir. Yapay zeka modellemeleri bu güvenli ekosistem üzerinde çalışır.</p>
+                </div>
+                
+                <div class="pt-8 text-center">
+                    <p class="text-[10px] text-slate-400">Son Güncelleme: Şubat 2026</p>
+                </div>
+            </div>
+        </div>
+        <div class="safe-bottom"></div>
+    </div>
+
+    <script>
+        // --- 1. ADIM: API KEY ---
+        // Lütfen API Anahtarınızı buraya tekrar yapıştırın.
+        const API_KEY = "AIzaSyALDNvKx7zHZZxyP1Pnr4cb7vD5mZxrusU"; 
+        
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const appContainer = document.getElementById('app-container');
+        const settingsPanel = document.getElementById('settings-panel');
+        const privacyPanel = document.getElementById('privacy-panel');
+
+        // Klavye açıldığında viewport yönetimi
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                const viewHeight = window.visualViewport.height;
+                appContainer.style.height = `${viewHeight}px`;
+                scrollToBottom();
+            });
+        }
+
+        // --- Ayarlar Panel Fonksiyonları ---
+        function openSettings() {
+            settingsPanel.classList.remove('translate-x-full');
+        }
+
+        function closeSettings() {
+            settingsPanel.classList.add('translate-x-full');
+        }
+
+        // --- Aydınlatma Metni Panel Fonksiyonları ---
+        function openPrivacy() {
+            privacyPanel.classList.remove('translate-y-full');
+        }
+
+        function closePrivacy() {
+            privacyPanel.classList.add('translate-y-full');
+        }
+
+        function checkUpdates() {
+            const btn = document.getElementById('update-btn');
+            const status = document.getElementById('update-status');
+            
+            status.classList.add('hidden');
+            btn.classList.add('animate-pulse');
+            
+            setTimeout(() => {
+                btn.classList.remove('animate-pulse');
+                status.classList.remove('hidden');
+                status.innerText = "SİSTEM GÜNCEL";
+            }, 1500);
+        }
+
+        // --- Sohbet ve API Fonksiyonları ---
+
+        function startChat() {
+            welcomeScreen.classList.add('hidden');
+            chatScreen.classList.remove('hidden');
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 50);
+        }
+
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // 1. Kullanıcı Mesajını Ekrana Bas
+            appendMessage(text, 'user');
+            userInput.value = '';
+            userInput.focus(); 
+            scrollToBottom();
+
+            // 2. "Düşünüyorum..." Balonunu Ekrana Bas
+            const thinkingId = 'thinking-' + Date.now();
+            appendMessage("Düşünüyorum...", 'ai', thinkingId);
+            const thinkingElement = document.getElementById(thinkingId);
+            thinkingElement.classList.add('typing-indicator');
+            scrollToBottom();
+
+            // 3. Google Gemini API Çağrısı (Otomatik Fallback ile)
+            callGeminiAPI(text, thinkingElement);
+        }
+
+        async function callGeminiAPI(userText, thinkingElement, retryWithPro = false) {
+            // Basit Key Kontrolü
+            if (!API_KEY || API_KEY.includes("BURAYA_GOOGLE_API_KEY")) {
+                thinkingElement.classList.remove('typing-indicator');
+                thinkingElement.innerText = "Hata: API Anahtarı girilmemiş. Lütfen kodun en üstündeki API_KEY alanını düzenleyin.";
+                return;
+            }
+
+            // MODEL SEÇİMİ (Otomatik Düzeltme Mekanizması)
+            // İlk denemede 'gemini-1.5-flash-latest' kullanır.
+            // Eğer 404 hatası alırsa ve 'retryWithPro' true gelirse 'gemini-pro' kullanır.
+            let modelName = retryWithPro ? "gemini-pro" : "gemini-1.5-flash-latest";
+            
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: userText }]
+                }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                // API'den bir hata döndü mü?
+                if (data.error) {
+                    // Eğer model bulunamadıysa (404) ve henüz 'gemini-pro' denemediysek:
+                    if (data.error.code === 404 && !retryWithPro) {
+                         console.warn("1.5 Flash bulunamadı, Gemini Pro'ya geçiliyor...");
+                         // Fonksiyonu tekrar çağır ama bu sefer 'gemini-pro' ile
+                         return callGeminiAPI(userText, thinkingElement, true);
+                    }
+                    throw new Error("API Hatası (" + data.error.code + "): " + data.error.message);
+                }
+
+                // Cevap boş mu veya filtrelendi mi?
+                if (!data.candidates || data.candidates.length === 0) {
+                     if (data.promptFeedback) {
+                        throw new Error("Güvenlik nedeniyle cevap oluşturulamadı.");
+                     }
+                     throw new Error("API boş cevap döndü.");
+                }
+
+                // Cevabı al ve balonu güncelle
+                const aiResponse = data.candidates[0].content.parts[0].text;
+                
+                thinkingElement.classList.remove('typing-indicator');
+                thinkingElement.innerText = aiResponse; 
+                scrollToBottom();
+
+            } catch (error) {
+                console.error("Detaylı API Hatası:", error);
+                thinkingElement.classList.remove('typing-indicator');
+                // HATA DETAYINI KULLANICIYA GÖSTER (Debug için)
+                thinkingElement.innerText = "Bir hata oluştu: " + error.message;
+                scrollToBottom();
+            }
+        }
+
+        function appendMessage(text, sender, id = null) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const div = document.createElement('div');
+            if(id) div.id = id;
+            div.className = `max-w-[85%] p-3 px-4 rounded-2xl text-base ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+            div.innerText = text;
+            
+            wrapper.appendChild(div);
+            chatMessages.appendChild(wrapper);
+        }
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        userInput.addEventListener('focus', () => {
+            setTimeout(scrollToBottom, 300);
+        });
+    </script>
+
+</body>
+</html>
