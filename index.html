@@ -207,9 +207,9 @@
     </div>
 
     <script>
-        // --- 1. ADIM: API KEY ---
-        // Lütfen API Anahtarınızı buraya tekrar yapıştırın.
-        const API_KEY = "AIzaSyALDNvKx7zHZZxyP1Pnr4cb7vD5mZxrusU"; 
+        // --- 1. ADIM: BACKEND URL ---
+        // Senin oluşturduğun Firebase Cloud Function adresi
+        const BACKEND_URL = "https://us-central1-arai-2705.cloudfunctions.net/chat"; 
         
         const welcomeScreen = document.getElementById('welcome-screen');
         const chatScreen = document.getElementById('chat-screen');
@@ -228,31 +228,17 @@
             });
         }
 
-        // --- Ayarlar Panel Fonksiyonları ---
-        function openSettings() {
-            settingsPanel.classList.remove('translate-x-full');
-        }
-
-        function closeSettings() {
-            settingsPanel.classList.add('translate-x-full');
-        }
-
-        // --- Aydınlatma Metni Panel Fonksiyonları ---
-        function openPrivacy() {
-            privacyPanel.classList.remove('translate-y-full');
-        }
-
-        function closePrivacy() {
-            privacyPanel.classList.add('translate-y-full');
-        }
+        // --- Panel Fonksiyonları ---
+        function openSettings() { settingsPanel.classList.remove('translate-x-full'); }
+        function closeSettings() { settingsPanel.classList.add('translate-x-full'); }
+        function openPrivacy() { privacyPanel.classList.remove('translate-y-full'); }
+        function closePrivacy() { privacyPanel.classList.add('translate-y-full'); }
 
         function checkUpdates() {
             const btn = document.getElementById('update-btn');
             const status = document.getElementById('update-status');
-            
             status.classList.add('hidden');
             btn.classList.add('animate-pulse');
-            
             setTimeout(() => {
                 btn.classList.remove('animate-pulse');
                 status.classList.remove('hidden');
@@ -293,73 +279,36 @@
             thinkingElement.classList.add('typing-indicator');
             scrollToBottom();
 
-            // 3. Google Gemini API Çağrısı (Otomatik Fallback ile)
-            callGeminiAPI(text, thinkingElement);
+            // 3. Backend'e İstek At
+            callBackendAPI(text, thinkingElement);
         }
 
-        async function callGeminiAPI(userText, thinkingElement, retryWithPro = false) {
-            // Basit Key Kontrolü
-            if (!API_KEY || API_KEY.includes("BURAYA_GOOGLE_API_KEY")) {
-                thinkingElement.classList.remove('typing-indicator');
-                thinkingElement.innerText = "Hata: API Anahtarı girilmemiş. Lütfen kodun en üstündeki API_KEY alanını düzenleyin.";
-                return;
-            }
-
-            // MODEL SEÇİMİ (Otomatik Düzeltme Mekanizması)
-            // İlk denemede 'gemini-1.5-flash-latest' kullanır.
-            // Eğer 404 hatası alırsa ve 'retryWithPro' true gelirse 'gemini-pro' kullanır.
-            let modelName = retryWithPro ? "gemini-pro" : "gemini-1.5-flash-latest";
-            
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
-            
-            const payload = {
-                contents: [{
-                    parts: [{ text: userText }]
-                }]
-            };
-
+        async function callBackendAPI(userText, thinkingElement) {
             try {
-                const response = await fetch(url, {
+                // Firebase Backend'e POST isteği
+                const response = await fetch(`${BACKEND_URL}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ message: userText })
                 });
 
                 const data = await response.json();
 
-                // API'den bir hata döndü mü?
                 if (data.error) {
-                    // Eğer model bulunamadıysa (404) ve henüz 'gemini-pro' denemediysek:
-                    if (data.error.code === 404 && !retryWithPro) {
-                         console.warn("1.5 Flash bulunamadı, Gemini Pro'ya geçiliyor...");
-                         // Fonksiyonu tekrar çağır ama bu sefer 'gemini-pro' ile
-                         return callGeminiAPI(userText, thinkingElement, true);
-                    }
-                    throw new Error("API Hatası (" + data.error.code + "): " + data.error.message);
+                    throw new Error(data.error);
                 }
 
-                // Cevap boş mu veya filtrelendi mi?
-                if (!data.candidates || data.candidates.length === 0) {
-                     if (data.promptFeedback) {
-                        throw new Error("Güvenlik nedeniyle cevap oluşturulamadı.");
-                     }
-                     throw new Error("API boş cevap döndü.");
-                }
-
-                // Cevabı al ve balonu güncelle
-                const aiResponse = data.candidates[0].content.parts[0].text;
-                
+                // Gelen cevabı yaz
                 thinkingElement.classList.remove('typing-indicator');
-                thinkingElement.innerText = aiResponse; 
+                thinkingElement.innerText = data.reply; 
                 scrollToBottom();
 
             } catch (error) {
-                console.error("Detaylı API Hatası:", error);
+                console.error("Backend Hatası:", error);
                 thinkingElement.classList.remove('typing-indicator');
-                // HATA DETAYINI KULLANICIYA GÖSTER (Debug için)
-                thinkingElement.innerText = "Bir hata oluştu: " + error.message;
+                thinkingElement.innerText = "Bağlantı hatası: Sunucuya ulaşılamadı. (" + error.message + ")";
                 scrollToBottom();
             }
         }
