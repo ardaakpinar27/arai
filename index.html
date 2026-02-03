@@ -71,6 +71,22 @@
             background: white;
             position: relative;
             z-index: 1;
+            transition: filter 0.3s ease; /* Blur geçişi için */
+        }
+
+        /* Spinner Stili */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #2563eb; /* Blue 600 */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -90,7 +106,12 @@
 
         <!-- 1. EKRAN: KARŞILAMA -->
         <main id="welcome-screen" class="flex-1 flex flex-col items-center justify-center px-8 text-center">
-            <h1 class="text-4xl font-bold text-slate-900 mb-4">ArAi'a Hoşgeldin</h1>
+            
+            <!-- BAŞLIK DÜZENLEMESİ: Ar Siyah, Ai Mavi -->
+            <h1 class="text-4xl font-bold mb-4">
+                <span class="text-slate-900">Ar</span><span class="text-blue-600">Ai</span><span class="text-slate-900">'a Hoşgeldin</span>
+            </h1>
+
             <p class="text-slate-500 text-xl mb-12">Hangi konudan bahsetmek istersin?</p>
             <button onclick="startChat()" class="w-full max-w-xs bg-blue-600 text-white py-5 rounded-2xl shadow-lg active:scale-95 transition-all text-xl mb-8">
                 Sohbete Başla
@@ -126,14 +147,19 @@
                     </button>
                 </div>
                 
-                <!-- UYARI METNİ -->
+                <!-- UYARI METNİ (Ünlem kaldırıldı) -->
                 <div class="text-center mt-2">
-                    <p class="text-[11px] text-slate-400 select-none">! ArAi Beta, hata yapabilir.</p>
+                    <p class="text-[11px] text-slate-400 select-none">ArAi Beta, hata yapabilir.</p>
                 </div>
 
                 <div class="safe-bottom"></div>
             </footer>
         </main>
+    </div>
+
+    <!-- LOADING SPINNER (YENİ) -->
+    <div id="loading-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+        <div class="loader"></div>
     </div>
 
     <!-- AYARLAR PANELİ (SAĞDAN KAYARAK GELİR) -->
@@ -207,10 +233,23 @@
     </div>
 
     <script>
-        // --- 1. ADIM: BACKEND URL ---
-        // Senin oluşturduğun Firebase Cloud Function adresi
+        // --- BACKEND URL ---
         const BACKEND_URL = "https://chat-po6bup4n5q-uc-419259839186.us-central1.run.app"; 
         
+        // --- YAPAY ZEKA EĞİTİMİ (KİMLİK AYARI) ---
+        const AI_SYSTEM_INSTRUCTION = `
+        Senin adın ArAi.
+        Sen Türkçe konuşan, son derece yardımsever ve zeki bir mobil asistansın.
+        
+        ÖNEMLİ KURALLAR:
+        1. Cevaplarını her zaman olabildiğince KISA ve ÖZ tut. Uzun paragraflar yazma.
+        2. Kullanıcıya her zaman "Siz" diliyle hitap et.
+        3. Kimlik sorularına (Seni kim yaptı?, Hangi modelsin?) SADECE: "Ben ArAi tarafından geliştirildim." de.
+        4. Gizlilik, veri saklama veya güvenlik sorularına (Konuşmalar tutuluyor mu?, Güvenli misin? vb.) SADECE: "Lütfen uygulama açılışındaki Aydınlatma Metnini gözden geçiriniz." cevabını ver.
+        5. Başka bir model veya şirket isminden (Google, Gemini vb.) asla bahsetme.
+        6. Eğer bir sistem bilgisi (tarih, saat veya hava durumu) sana verilirse, onu kullanıcıya aktar.
+        `;
+
         const welcomeScreen = document.getElementById('welcome-screen');
         const chatScreen = document.getElementById('chat-screen');
         const chatMessages = document.getElementById('chat-messages');
@@ -218,6 +257,7 @@
         const appContainer = document.getElementById('app-container');
         const settingsPanel = document.getElementById('settings-panel');
         const privacyPanel = document.getElementById('privacy-panel');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
         // Klavye açıldığında viewport yönetimi
         if (window.visualViewport) {
@@ -246,11 +286,21 @@
             }, 1500);
         }
 
-        // --- Sohbet ve API Fonksiyonları ---
-
+        // --- Sohbet Başlatma (SPINNER VE BLUR EFEKTİ) ---
         function startChat() {
-            welcomeScreen.classList.add('hidden');
-            chatScreen.classList.remove('hidden');
+            // Spinner göster
+            loadingOverlay.classList.remove('hidden');
+            // Arkadaki içeriği blurla
+            appContainer.style.filter = "blur(5px)";
+
+            // 2.5 saniye bekle
+            setTimeout(() => {
+                loadingOverlay.classList.add('hidden');
+                appContainer.style.filter = "none"; // Bluru kaldır
+                
+                welcomeScreen.classList.add('hidden');
+                chatScreen.classList.remove('hidden');
+            }, 2500);
         }
 
         function scrollToBottom() {
@@ -262,7 +312,7 @@
             }, 50);
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             const text = userInput.value.trim();
             if (!text) return;
 
@@ -279,11 +329,73 @@
             thinkingElement.classList.add('typing-indicator');
             scrollToBottom();
 
-            // 3. Backend'e İstek At
-            callBackendAPI(text, thinkingElement);
+            // --- YENİ ÖZELLİK: Gelişmiş Bağlam (Tarih + Hava Durumu) ---
+            const contextPrompt = await getSmartContext(text);
+            
+            // Tüm bilgileri birleştirip sunucuya gönderiyoruz
+            const fullPrompt = `${AI_SYSTEM_INSTRUCTION}\n\n${contextPrompt}\n\nKullanıcı Mesajı: ${text}`;
+            
+            callBackendAPI(fullPrompt, thinkingElement);
         }
 
-        async function callBackendAPI(userText, thinkingElement) {
+        // --- AKILLI BAĞLAM OLUŞTURUCU (Tarih ve Hava Durumu) ---
+        async function getSmartContext(userMessage) {
+            // 1. Tarih ve Saat Bilgisi
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            
+            let context = `[SİSTEM BİLGİSİ: Bugünün tarihi ${dateStr}, Saat şu an ${timeStr}.]`;
+
+            // 2. Hava Durumu Kontrolü (Hava kelimesi geçiyorsa)
+            if (userMessage.toLowerCase().includes("hava")) {
+                try {
+                    // Kullanıcı mesajından olası şehir ismini bulmaya çalış (Basit yöntem)
+                    const commonCities = ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Adana", "Konya", "Gaziantep", "Şanlıurfa", "Kocaeli", "Mersin", "Diyarbakır", "Hatay", "Manisa", "Kayseri", "Samsun", "Balıkesir", "Kahramanmaraş", "Van", "Aydın", "Tekirdağ", "Sakarya", "Denizli", "Muğla", "Eskişehir", "Trabzon", "Ordu"];
+                    
+                    let foundCity = null;
+                    
+                    for (let city of commonCities) {
+                        if (userMessage.toLowerCase().includes(city.toLowerCase())) {
+                            foundCity = city;
+                            break;
+                        }
+                    }
+
+                    if (foundCity) {
+                        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${foundCity}&count=1&language=tr&format=json`;
+                        const geoResponse = await fetch(geoUrl);
+                        const geoData = await geoResponse.json();
+
+                        if (geoData.results && geoData.results.length > 0) {
+                            const { latitude, longitude, name } = geoData.results[0];
+
+                            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`;
+                            const weatherResponse = await fetch(weatherUrl);
+                            const weatherData = await weatherResponse.json();
+                            
+                            const temp = weatherData.current.temperature_2m;
+                            const wCode = weatherData.current.weather_code;
+                            
+                            let weatherDesc = "Açık";
+                            if (wCode > 3) weatherDesc = "Bulutlu/Sisli";
+                            if (wCode > 50) weatherDesc = "Yağmurlu";
+                            if (wCode > 70) weatherDesc = "Karlı";
+
+                            context += `\n[SİSTEM BİLGİSİ: ${name} için anlık hava durumu: ${temp}°C, Durum: ${weatherDesc}. Bu bilgiyi kullanıcıya aktar.]`;
+                        }
+                    } else {
+                        context += `\n[SİSTEM NOTU: Kullanıcı hava durumu sordu ama şehir belirtilmediyse hangi şehir olduğunu sor.]`;
+                    }
+                } catch (e) {
+                    console.error("Hava durumu hatası:", e);
+                }
+            }
+            
+            return context;
+        }
+
+        async function callBackendAPI(promptToSend, thinkingElement) {
             try {
                 // Firebase Backend'e POST isteği
                 const response = await fetch(`${BACKEND_URL}`, {
@@ -291,7 +403,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message: userText })
+                    body: JSON.stringify({ message: promptToSend })
                 });
 
                 const data = await response.json();
