@@ -17,7 +17,7 @@
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
         
-        /* FONT AYARI: Tüm elementler için Inter Medium zorunlu kılındı */
+        /* FONT AYARI */
         body, html, button, input, textarea, div, p, h1, h2, h3, span, li {
             font-family: 'Inter', sans-serif !important;
             font-weight: 500 !important;
@@ -71,13 +71,13 @@
             background: white;
             position: relative;
             z-index: 1;
-            transition: filter 0.3s ease; /* Blur geçişi için */
+            transition: filter 0.3s ease;
         }
 
         /* Spinner Stili */
         .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #2563eb; /* Blue 600 */
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid #2563eb; 
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -107,7 +107,6 @@
         <!-- 1. EKRAN: KARŞILAMA -->
         <main id="welcome-screen" class="flex-1 flex flex-col items-center justify-center px-8 text-center">
             
-            <!-- BAŞLIK DÜZENLEMESİ: Ar Siyah, Ai Mavi -->
             <h1 class="text-4xl font-bold mb-4">
                 <span class="text-slate-900">Ar</span><span class="text-blue-600">Ai</span><span class="text-slate-900">'a Hoşgeldin</span>
             </h1>
@@ -137,17 +136,14 @@
             <!-- Input Alanı -->
             <footer id="chat-footer" class="bg-white px-3 py-3 border-t border-slate-100 shrink-0">
                 <div class="flex items-center gap-2">
-                    <!-- Mesaj Kutusu -->
                     <input type="text" id="user-input" placeholder="Mesajınızı yazın..." autocomplete="off"
                            class="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 outline-none focus:border-blue-500 transition-colors text-base">
                     
-                    <!-- Buton -->
                     <button onclick="sendMessage()" class="w-12 h-12 flex items-center justify-center rounded-full active:scale-90 transition-all shrink-0">
                         <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/sendbutton.png" alt="Send" class="w-full h-full object-contain">
                     </button>
                 </div>
                 
-                <!-- UYARI METNİ (Ünlem kaldırıldı) -->
                 <div class="text-center mt-2">
                     <p class="text-[11px] text-slate-400 select-none">ArAi Beta, hata yapabilir.</p>
                 </div>
@@ -157,22 +153,19 @@
         </main>
     </div>
 
-    <!-- LOADING SPINNER (YENİ) -->
+    <!-- LOADING SPINNER -->
     <div id="loading-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center">
         <div class="loader"></div>
     </div>
 
-    <!-- AYARLAR PANELİ (SAĞDAN KAYARAK GELİR) -->
+    <!-- AYARLAR PANELİ -->
     <div id="settings-panel" class="fixed inset-0 z-50 bg-white transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
-        <!-- Ayarlar Header -->
         <header class="safe-top bg-white px-4 py-4 flex items-center border-b border-slate-100 shrink-0">
             <button onclick="closeSettings()" class="p-2 -ml-2 mr-2 active:scale-90 transition-transform text-slate-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
             <h2 class="text-xl font-bold text-slate-900">Ayarlar</h2>
         </header>
-
-        <!-- Ayarlar İçerik -->
         <div class="flex-1 p-6 overflow-y-auto">
             <div class="space-y-4">
                 <button onclick="checkUpdates()" id="update-btn" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 active:bg-slate-200 transition-colors">
@@ -180,50 +173,40 @@
                     <span id="update-status" class="hidden text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full whitespace-nowrap">GÜNCEL</span>
                 </button>
             </div>
-
-            <!-- Version Info -->
             <div class="mt-12 text-center">
                  <p class="text-slate-300 text-sm">v1.0.0 Beta</p>
                  <p class="text-[10px] text-slate-200 mt-1">ArAi Technologies</p>
             </div>
         </div>
-        
         <div class="safe-bottom"></div>
     </div>
 
-    <!-- AYDINLATMA METNİ PANELİ (AŞAĞIDAN YUKARI) -->
+    <!-- AYDINLATMA METNİ -->
     <div id="privacy-panel" class="fixed inset-0 z-50 bg-white transform translate-y-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
-        <!-- Header -->
         <header class="safe-top bg-white px-4 py-4 flex items-center justify-between border-b border-slate-100 shrink-0">
             <h2 class="text-xl font-bold text-slate-900 ml-2">Aydınlatma Metni</h2>
             <button onclick="closePrivacy()" class="p-2 active:scale-90 transition-transform text-slate-600 bg-slate-100 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </header>
-
-        <!-- İçerik -->
         <div class="flex-1 p-6 overflow-y-auto">
             <div class="space-y-6 text-slate-600 text-sm leading-relaxed">
                 <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
                     <h3 class="text-blue-800 font-bold text-base mb-2">Veri Gizliliği ve Güvenlik</h3>
                     <p class="text-blue-700 text-xs">ArAi, kullanıcı gizliliğini en üst düzeyde tutmayı taahhüt eder.</p>
                 </div>
-
                 <div>
                     <h3 class="text-slate-900 font-bold mb-2">Veri Saklama</h3>
                     <p>ArAi üzerindeki sohbetleriniz <strong>hiçbir şekilde sunucularımızda barındırılmaz</strong>. Tüm mesajlaşma geçmişiniz ve verileriniz, yalnızca kullanmakta olduğunuz cihazın geçici önbelleğinde (cache) tutulur.</p>
                 </div>
-
                 <div>
                     <h3 class="text-slate-900 font-bold mb-2">Erişim ve Paylaşım</h3>
                     <p>Verileriniz tamamen size aittir. Uygulamayı kapattığınızda veya önbelleği temizlediğinizde veriler silinebilir. Siz manuel olarak paylaşmadığınız sürece, sohbet içeriklerinizi kimse göremez ve üçüncü şahıslarla paylaşılamaz.</p>
                 </div>
-
                 <div>
                     <h3 class="text-slate-900 font-bold mb-2">Altyapı</h3>
                     <p>Uygulamamız, güvenli ve hızlı bir deneyim sunmak amacıyla <strong>Google altyapıları</strong> (Gemini API) ve teknolojileri kullanılarak geliştirilmiştir. Yapay zeka modellemeleri bu güvenli ekosistem üzerinde çalışır.</p>
                 </div>
-                
                 <div class="pt-8 text-center">
                     <p class="text-[10px] text-slate-400">Son Güncelleme: Şubat 2026</p>
                 </div>
@@ -233,10 +216,12 @@
     </div>
 
     <script>
-        // --- BACKEND URL ---
         const BACKEND_URL = "https://chat-po6bup4n5q-uc-419259839186.us-central1.run.app"; 
         
-        // --- YAPAY ZEKA EĞİTİMİ (KİMLİK AYARI) ---
+        // --- HAFIZA VE EĞİTİM AYARLARI ---
+        let chatHistory = []; // Sohbet geçmişini tutan dizi
+        const MAX_HISTORY = 10; // Hafızada tutulacak son mesaj sayısı
+
         const AI_SYSTEM_INSTRUCTION = `
         Senin adın ArAi.
         Sen Türkçe konuşan, son derece yardımsever ve zeki bir mobil asistansın.
@@ -246,8 +231,8 @@
         2. Kullanıcıya her zaman "Siz" diliyle hitap et.
         3. Kimlik sorularına (Seni kim yaptı?, Hangi modelsin?) SADECE: "Ben ArAi tarafından geliştirildim." de.
         4. Gizlilik, veri saklama veya güvenlik sorularına (Konuşmalar tutuluyor mu?, Güvenli misin? vb.) SADECE: "Lütfen uygulama açılışındaki Aydınlatma Metnini gözden geçiriniz." cevabını ver.
-        5. Başka bir model veya şirket isminden (Google, Gemini vb.) asla bahsetme.
-        6. Eğer bir sistem bilgisi (tarih, saat veya hava durumu) sana verilirse, onu kullanıcıya aktar.
+        5. Sana sistem tarafından "Bugünün tarihi X" gibi bilgiler verilecek. Kullanıcı AÇIKÇA "Bugün günlerden ne?" veya "Saat kaç?" diye sormadığı sürece, bu bilgiyi cümlede ASLA kullanma.
+        6. Sohbet geçmişine bakarak cevap ver, önceki konuları hatırla.
         `;
 
         const welcomeScreen = document.getElementById('welcome-screen');
@@ -259,7 +244,6 @@
         const privacyPanel = document.getElementById('privacy-panel');
         const loadingOverlay = document.getElementById('loading-overlay');
 
-        // Klavye açıldığında viewport yönetimi
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', () => {
                 const viewHeight = window.visualViewport.height;
@@ -268,12 +252,11 @@
             });
         }
 
-        // --- Panel Fonksiyonları ---
+        // Panel Fonksiyonları
         function openSettings() { settingsPanel.classList.remove('translate-x-full'); }
         function closeSettings() { settingsPanel.classList.add('translate-x-full'); }
         function openPrivacy() { privacyPanel.classList.remove('translate-y-full'); }
         function closePrivacy() { privacyPanel.classList.add('translate-y-full'); }
-
         function checkUpdates() {
             const btn = document.getElementById('update-btn');
             const status = document.getElementById('update-status');
@@ -286,18 +269,14 @@
             }, 1500);
         }
 
-        // --- Sohbet Başlatma (SPINNER VE BLUR EFEKTİ) ---
+        // Spinner ve Blur Efekti
         function startChat() {
-            // Spinner göster
             loadingOverlay.classList.remove('hidden');
-            // Arkadaki içeriği blurla
             appContainer.style.filter = "blur(5px)";
 
-            // 2.5 saniye bekle
             setTimeout(() => {
                 loadingOverlay.classList.add('hidden');
-                appContainer.style.filter = "none"; // Bluru kaldır
-                
+                appContainer.style.filter = "none";
                 welcomeScreen.classList.add('hidden');
                 chatScreen.classList.remove('hidden');
             }, 2500);
@@ -305,10 +284,7 @@
 
         function scrollToBottom() {
             setTimeout(() => {
-                chatMessages.scrollTo({
-                    top: chatMessages.scrollHeight,
-                    behavior: 'smooth'
-                });
+                chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
             }, 50);
         }
 
@@ -316,45 +292,62 @@
             const text = userInput.value.trim();
             if (!text) return;
 
-            // 1. Kullanıcı Mesajını Ekrana Bas
+            // 1. Ekrana bas
             appendMessage(text, 'user');
             userInput.value = '';
             userInput.focus(); 
             scrollToBottom();
 
-            // 2. "Düşünüyorum..." Balonunu Ekrana Bas
+            // 2. Hafızaya ekle (Kullanıcı mesajı)
+            chatHistory.push({ role: 'user', content: text });
+            if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
+
+            // 3. Yükleniyor balonu
             const thinkingId = 'thinking-' + Date.now();
             appendMessage("Düşünüyorum...", 'ai', thinkingId);
             const thinkingElement = document.getElementById(thinkingId);
             thinkingElement.classList.add('typing-indicator');
             scrollToBottom();
 
-            // --- YENİ ÖZELLİK: Gelişmiş Bağlam (Tarih + Hava Durumu) ---
+            // 4. Bağlamı oluştur (Tarih/Hava)
             const contextPrompt = await getSmartContext(text);
             
-            // Tüm bilgileri birleştirip sunucuya gönderiyoruz
-            const fullPrompt = `${AI_SYSTEM_INSTRUCTION}\n\n${contextPrompt}\n\nKullanıcı Mesajı: ${text}`;
+            // 5. Hafızayı metne dök (History Serialization)
+            // Backend'e tek bir string yollayabildiğimiz için geçmişi birleştiriyoruz.
+            let conversationContext = "";
+            chatHistory.forEach(msg => {
+                const prefix = msg.role === 'user' ? "Kullanıcı: " : "Sen (ArAi): ";
+                conversationContext += prefix + msg.content + "\n";
+            });
+
+            // 6. Nihai Prompt (Sistem + Bağlam + Geçmiş + Son Mesaj)
+            // Not: Backend son mesajı body.message olarak alıyor ama biz buraya her şeyi gömüyoruz.
+            // Bu "prompt engineering" taktiğidir.
+            const fullPrompt = `
+            ${AI_SYSTEM_INSTRUCTION}
+
+            ${contextPrompt}
+
+            İŞTE GEÇMİŞ KONUŞMALAR (Hafızan):
+            ${conversationContext}
+
+            (Yukarıdaki geçmişi ve kuralları dikkate alarak son Kullanıcı mesajına cevap ver)
+            `;
             
             callBackendAPI(fullPrompt, thinkingElement);
         }
 
-        // --- AKILLI BAĞLAM OLUŞTURUCU (Tarih ve Hava Durumu) ---
         async function getSmartContext(userMessage) {
-            // 1. Tarih ve Saat Bilgisi
             const now = new Date();
             const dateStr = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
             
-            let context = `[SİSTEM BİLGİSİ: Bugünün tarihi ${dateStr}, Saat şu an ${timeStr}.]`;
+            let context = `[SİSTEM BİLGİSİ (GİZLİ): Bugün ${dateStr}, Saat ${timeStr}. KURAL: Kullanıcı sormadıkça bu tarihi söyleme!]`;
 
-            // 2. Hava Durumu Kontrolü (Hava kelimesi geçiyorsa)
             if (userMessage.toLowerCase().includes("hava")) {
                 try {
-                    // Kullanıcı mesajından olası şehir ismini bulmaya çalış (Basit yöntem)
                     const commonCities = ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Adana", "Konya", "Gaziantep", "Şanlıurfa", "Kocaeli", "Mersin", "Diyarbakır", "Hatay", "Manisa", "Kayseri", "Samsun", "Balıkesir", "Kahramanmaraş", "Van", "Aydın", "Tekirdağ", "Sakarya", "Denizli", "Muğla", "Eskişehir", "Trabzon", "Ordu"];
-                    
                     let foundCity = null;
-                    
                     for (let city of commonCities) {
                         if (userMessage.toLowerCase().includes(city.toLowerCase())) {
                             foundCity = city;
@@ -369,58 +362,50 @@
 
                         if (geoData.results && geoData.results.length > 0) {
                             const { latitude, longitude, name } = geoData.results[0];
-
                             const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`;
                             const weatherResponse = await fetch(weatherUrl);
                             const weatherData = await weatherResponse.json();
                             
                             const temp = weatherData.current.temperature_2m;
                             const wCode = weatherData.current.weather_code;
-                            
                             let weatherDesc = "Açık";
-                            if (wCode > 3) weatherDesc = "Bulutlu/Sisli";
+                            if (wCode > 3) weatherDesc = "Bulutlu";
                             if (wCode > 50) weatherDesc = "Yağmurlu";
                             if (wCode > 70) weatherDesc = "Karlı";
 
-                            context += `\n[SİSTEM BİLGİSİ: ${name} için anlık hava durumu: ${temp}°C, Durum: ${weatherDesc}. Bu bilgiyi kullanıcıya aktar.]`;
+                            context += `\n[SİSTEM BİLGİSİ: ${name} hava durumu: ${temp}°C, ${weatherDesc}. Bu bilgiyi kullanıcıya aktar.]`;
                         }
-                    } else {
-                        context += `\n[SİSTEM NOTU: Kullanıcı hava durumu sordu ama şehir belirtilmediyse hangi şehir olduğunu sor.]`;
                     }
-                } catch (e) {
-                    console.error("Hava durumu hatası:", e);
-                }
+                } catch (e) { console.error("Hava durumu hatası:", e); }
             }
-            
             return context;
         }
 
         async function callBackendAPI(promptToSend, thinkingElement) {
             try {
-                // Firebase Backend'e POST isteği
                 const response = await fetch(`${BACKEND_URL}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: promptToSend })
                 });
 
                 const data = await response.json();
 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
+                if (data.error) throw new Error(data.error);
 
-                // Gelen cevabı yaz
+                // Cevabı ekrana bas
                 thinkingElement.classList.remove('typing-indicator');
                 thinkingElement.innerText = data.reply; 
                 scrollToBottom();
 
+                // 7. Hafızaya ekle (AI cevabı)
+                chatHistory.push({ role: 'ai', content: data.reply });
+                if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
+
             } catch (error) {
                 console.error("Backend Hatası:", error);
                 thinkingElement.classList.remove('typing-indicator');
-                thinkingElement.innerText = "Bağlantı hatası: Sunucuya ulaşılamadı. (" + error.message + ")";
+                thinkingElement.innerText = "Bağlantı hatası: Sunucuya ulaşılamadı.";
                 scrollToBottom();
             }
         }
@@ -429,23 +414,4 @@
             const wrapper = document.createElement('div');
             wrapper.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
             
-            const div = document.createElement('div');
-            if(id) div.id = id;
-            div.className = `max-w-[85%] p-3 px-4 rounded-2xl text-base ${sender === 'user' ? 'message-user' : 'message-ai'}`;
-            div.innerText = text;
-            
-            wrapper.appendChild(div);
-            chatMessages.appendChild(wrapper);
-        }
-
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-        
-        userInput.addEventListener('focus', () => {
-            setTimeout(scrollToBottom, 300);
-        });
-    </script>
-
-</body>
-</html>
+       
