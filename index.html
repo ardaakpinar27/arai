@@ -73,7 +73,6 @@
 <body>
 
     <div id="app-container">
-        <!-- HEADER -->
         <header class="flex items-center justify-between px-4 py-2">
             <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/arailogonew.png" alt="ArAi Logo" class="logo-header">
             <button onclick="openSettings()" class="p-2 active:scale-90 transition-transform">
@@ -81,7 +80,6 @@
             </button>
         </header>
 
-        <!-- WELCOME -->
         <main id="welcome-screen" class="flex flex-col items-center justify-center px-8 text-center bg-white h-full">
             <h1 class="text-4xl font-bold mb-4">
                 <span class="text-slate-900">Ar</span><span class="text-blue-600">Ai</span><span class="text-slate-900">'a Hoşgeldin</span>
@@ -91,14 +89,12 @@
             <button onclick="openPrivacy()" class="text-slate-400 text-xs border-b border-slate-300 pb-0.5">Aydınlatma Metni</button>
         </main>
 
-        <!-- CHAT -->
         <main id="chat-screen" class="hidden flex flex-col overflow-hidden bg-white relative h-full">
             <div id="chat-messages" class="flex-1">
                 <div class="message-ai max-w-[85%] p-3 px-4 rounded-2xl text-base">Merhaba! Ben ArAi. Sana nasıl yardımcı olabilirim?</div>
             </div>
         </main>
 
-        <!-- FOOTER -->
         <footer id="chat-footer" class="hidden px-3 py-3 bg-white">
             <div class="flex items-center gap-2">
                 <input type="text" id="user-input" placeholder="Mesajınızı yazın..." autocomplete="off" class="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 outline-none focus:border-blue-500 text-base">
@@ -110,12 +106,10 @@
         </footer>
     </div>
 
-    <!-- SPINNER -->
     <div id="loading-overlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-white/70 backdrop-blur-md">
         <div class="loader"></div>
     </div>
 
-    <!-- PRIVACY (GÜNCELLENDİ) -->
     <div id="privacy-panel" class="fixed inset-0 z-[60] bg-white transform translate-y-full transition-transform duration-300 flex flex-col shadow-2xl">
         <header class="flex items-center justify-between px-6 py-4 border-b">
             <h2 class="text-xl font-bold">Aydınlatma Metni</h2>
@@ -126,44 +120,19 @@
                 <h3 class="text-blue-800 font-bold mb-1">Veri Gizliliği</h3>
                 <p>ArAi, kullanıcı gizliliğini en üst düzeyde tutar.</p>
             </div>
-            <p><strong>Veri Saklama:</strong> Sohbetleriniz sunucularda barındırılmaz, sadece cihazınızın geçici önbelleğinde (cache) tutulur.</p>
-            <p><strong>Erişim:</strong> Uygulamayı kapattığınızda veriler silinebilir. Kimse göremez.</p>
-            <p><strong>Altyapı:</strong> Uygulamamız, güvenli ve hızlı bir deneyim sunmak amacıyla <strong>Google altyapıları (Gemini API)</strong> ve teknolojileri kullanılarak geliştirilmiştir.</p>
-        </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div id="settings-panel" class="fixed inset-0 z-[60] bg-white transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
-        <header class="flex items-center justify-between px-6 py-4 border-b">
-            <h2 class="text-xl font-bold">Ayarlar</h2>
-            <button onclick="closeSettings()" class="p-2 bg-slate-100 rounded-full">✕</button>
-        </header>
-        <div class="flex-1 p-6">
-            <button onclick="alert('Sistem Güncel')" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                <span>Güncellemeleri Denetle</span>
-                <span class="text-blue-600 font-bold text-xs">GÜNCEL</span>
-            </button>
+            <p><strong>Veri Saklama:</strong> Sohbetleriniz sunucularda barındırılmaz, sadece cihazınızın geçici önbelleğinde tutulur.</p>
+            <p><strong>Altyapı:</strong> Uygulamamız <strong>Google altyapıları (Gemini API)</strong> kullanılarak geliştirilmiştir.</p>
         </div>
     </div>
 
     <script>
-        const BACKEND_URL = "https://chat-po6bup4n5q-uc.a.run.app"; 
+        const BACKEND_URL = "https://chat-po6bup4n5q-uc-419259839186.us-central1.run.app"; 
         
         let chatHistory = [];
         const MAX_HISTORY = 6;
 
-        // --- ÖZGÜRLEŞTİRİLMİŞ TALİMAT ---
-        const AI_SYSTEM_INSTRUCTION = `
-        Senin adın ArAi. ArAi tarafından geliştirilen, son derece zeki, yardımsever ve doğal konuşan bir asistansın.
-        
-        DAVRANIŞ KURALLARI:
-        1. Kullanıcıyla doğal ve akıcı bir şekilde sohbet et.
-        2. Sorulan soruya göre cevabın uzunluğunu ayarla. Detaylı bilgi istenirse uzun ve kapsamlı anlat.
-        3. Kullanıcıya her zaman "Siz" diliyle hitap et.
-        4. "Ben bir yapay zekayım" gibi robotik girişler yapma, direkt konuya gir.
-        `;
+        const AI_SYSTEM_INSTRUCTION = `Senin adın ArAi. ArAi tarafından geliştirilen zeki bir asistansın. Doğal davran. Soruya göre cevap uzunluğunu ayarla.`;
 
-        // Klavye Fix
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', () => {
                 document.getElementById('app-container').style.height = `${window.visualViewport.height}px`;
@@ -173,8 +142,7 @@
 
         function openPrivacy() { document.getElementById('privacy-panel').classList.remove('translate-y-full'); }
         function closePrivacy() { document.getElementById('privacy-panel').classList.add('translate-y-full'); }
-        function openSettings() { document.getElementById('settings-panel').classList.remove('translate-x-full'); }
-        function closeSettings() { document.getElementById('settings-panel').classList.add('translate-x-full'); }
+        function openSettings() { alert("Ayarlar Yakında!"); }
 
         function startChat() {
             document.getElementById('loading-overlay').classList.remove('hidden');
@@ -216,7 +184,7 @@
                     body: JSON.stringify({ message: `${AI_SYSTEM_INSTRUCTION}\n\nGEÇMİŞ SOHBET:\n${historyStr}\n\nKULLANICI SON MESAJI: ${text}` })
                 });
 
-                if (!res.ok) throw new Error("Sunucu Yanıt Vermedi");
+                if (!res.ok) throw new Error("Bağlantı Hatası: " + res.status);
 
                 const data = await res.json();
                 
@@ -226,11 +194,11 @@
                     chatHistory.push({ role: 'ai', content: data.reply });
                     if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
                 } else {
-                    tEl.innerText = "Yapay zeka boş yanıt döndürdü.";
+                    tEl.innerText = "Yapay zeka yanıt döndüremedi.";
                 }
             } catch (e) { 
                 tEl.innerText = "Bağlantı hatası: Sunucuya ulaşılamıyor.";
-                console.error("Hata:", e);
+                console.error(e);
             }
             scrollToBottom();
         }
@@ -247,5 +215,3 @@
     </script>
 </body>
 </html>
-
-
