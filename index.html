@@ -14,8 +14,6 @@
         :root {
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-left: env(safe-area-inset-left, 0px);
-            --safe-right: env(safe-area-inset-right, 0px);
         }
         
         body, html {
@@ -24,167 +22,159 @@
             background-color: white;
             margin: 0;
             padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden; /* Sayfanın genel kaymasını engelle */
-        }
-
-        /* ANA KAPSAYICI - KLAVYE İLE BOYUTU DEĞİŞECEK */
-        #app-container {
-            display: grid;
-            grid-template-rows: auto 1fr auto; /* Header - İçerik - Footer */
             height: 100dvh;
             width: 100%;
+            overflow: hidden;
             position: fixed;
-            top: 0;
-            left: 0;
         }
 
-        /* HEADER */
+        #app-container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100dvh;
+            width: 100%;
+        }
+
         header {
             padding-top: var(--safe-top);
-            padding-left: var(--safe-left);
-            padding-right: var(--safe-right);
             background: white;
             z-index: 50;
             border-bottom: 1px solid #f1f5f9;
+            flex-shrink: 0;
         }
 
-        /* MESAJ ALANI - SADECE BURASI KAYACAK */
         #chat-messages {
             overflow-y: auto;
-            overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
-            padding-left: var(--safe-left);
-            padding-right: var(--safe-right);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
 
-        /* FOOTER */
         footer {
             padding-bottom: var(--safe-bottom);
-            padding-left: var(--safe-left);
-            padding-right: var(--safe-right);
             background: white;
             border-top: 1px solid #f1f5f9;
             z-index: 50;
+            flex-shrink: 0;
         }
 
-        .message-user { background-color: #2563eb; color: white; border-bottom-right-radius: 4px; }
-        .message-ai { background-color: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; }
+        .message-user { background-color: #2563eb; color: white; border-bottom-right-radius: 4px; align-self: flex-end; }
+        .message-ai { background-color: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; align-self: flex-start; }
         .typing-indicator { font-style: italic; opacity: 0.7; font-size: 0.9rem; }
         .hidden { display: none !important; }
 
         .logo-header { height: 50px; width: auto; }
-
-        /* Spinner */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #2563eb;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div id="app-container">
-        <header class="flex items-center justify-between px-4 py-2 bg-white">
+        <!-- HEADER -->
+        <header class="flex items-center justify-between px-4 py-2">
             <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/arailogonew.png" alt="ArAi Logo" class="logo-header">
             <button onclick="openSettings()" class="p-2 active:scale-90 transition-transform">
                 <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/settings.png" alt="Ayarlar" class="w-8 h-8">
             </button>
         </header>
 
-        <main id="welcome-screen" class="flex flex-col items-center justify-center px-8 text-center bg-white">
+        <!-- WELCOME -->
+        <main id="welcome-screen" class="flex flex-col items-center justify-center px-8 text-center bg-white h-full">
             <h1 class="text-4xl font-bold mb-4">
                 <span class="text-slate-900">Ar</span><span class="text-blue-600">Ai</span><span class="text-slate-900">'a Hoşgeldin</span>
             </h1>
             <p class="text-slate-500 text-xl mb-12">Hangi konudan bahsetmek istersin?</p>
-            <button onclick="startChat()" class="w-full max-w-xs bg-blue-600 text-white py-5 rounded-2xl shadow-lg active:scale-95 transition-all text-xl mb-6">
-                Sohbete Başla
-            </button>
-            <button onclick="openPrivacy()" class="text-slate-400 text-xs border-b border-slate-300 pb-0.5">
-                Aydınlatma Metni
-            </button>
+            <button onclick="startChat()" class="w-full max-w-xs bg-blue-600 text-white py-5 rounded-2xl shadow-lg active:scale-95 transition-all text-xl mb-6">Sohbete Başla</button>
+            <button onclick="openPrivacy()" class="text-slate-400 text-xs border-b border-slate-300 pb-0.5">Aydınlatma Metni</button>
         </main>
 
-        <main id="chat-screen" class="hidden flex flex-col overflow-hidden bg-white">
-            <div id="chat-messages" class="flex-1 space-y-4 p-4">
-                <div class="flex justify-start">
-                    <div class="message-ai max-w-[85%] p-3 px-4 rounded-2xl text-base">
-                        Merhaba! Ben ArAi. Hangi konudan bahsetmek istersin?
-                    </div>
-                </div>
+        <!-- CHAT -->
+        <main id="chat-screen" class="hidden flex flex-col overflow-hidden bg-white relative h-full">
+            <div id="chat-messages" class="flex-1">
+                <div class="message-ai max-w-[85%] p-3 px-4 rounded-2xl text-base">Merhaba! Ben ArAi. Sana nasıl yardımcı olabilirim?</div>
             </div>
         </main>
 
+        <!-- FOOTER -->
         <footer id="chat-footer" class="hidden px-3 py-3 bg-white">
             <div class="flex items-center gap-2">
-                <input type="text" id="user-input" placeholder="Mesajınızı yazın..." autocomplete="off"
-                       class="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 outline-none focus:border-blue-500 text-base">
+                <input type="text" id="user-input" placeholder="Mesajınızı yazın..." autocomplete="off" class="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 outline-none focus:border-blue-500 text-base">
                 <button onclick="sendMessage()" class="w-12 h-12 shrink-0 active:scale-90 transition-transform">
                     <img src="https://filedn.eu/liPnBWWQgeQVeGgdPoPnl8S/arai/sendbutton.png" alt="Send" class="w-full h-full">
                 </button>
             </div>
-            <div class="text-center mt-2">
-                <p class="text-[10px] text-slate-400">ArAi Beta, hata yapabilir.</p>
-            </div>
+            <div class="text-center mt-2"><p class="text-[10px] text-slate-400">ArAi Beta, hata yapabilir.</p></div>
         </footer>
     </div>
 
+    <!-- SPINNER -->
     <div id="loading-overlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-white/70 backdrop-blur-md">
         <div class="loader"></div>
     </div>
 
-    <div id="privacy-panel" class="fixed inset-0 z-[60] bg-white transform translate-y-full transition-transform duration-300 flex flex-col">
-        <header class="safe-top flex items-center justify-between px-6 py-4 border-b">
+    <!-- PRIVACY (GÜNCELLENDİ) -->
+    <div id="privacy-panel" class="fixed inset-0 z-[60] bg-white transform translate-y-full transition-transform duration-300 flex flex-col shadow-2xl">
+        <header class="flex items-center justify-between px-6 py-4 border-b">
             <h2 class="text-xl font-bold">Aydınlatma Metni</h2>
             <button onclick="closePrivacy()" class="p-2 bg-slate-100 rounded-full">✕</button>
         </header>
-        <div class="flex-1 p-6 overflow-y-auto space-y-6 text-sm text-slate-600">
+        <div class="flex-1 p-6 overflow-y-auto space-y-4 text-sm text-slate-600">
             <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
                 <h3 class="text-blue-800 font-bold mb-1">Veri Gizliliği</h3>
                 <p>ArAi, kullanıcı gizliliğini en üst düzeyde tutar.</p>
             </div>
-            <div>
-                <h3 class="text-slate-900 font-bold mb-1">Veri Saklama</h3>
-                <p>Sohbetleriniz sunucularda barındırılmaz, sadece cihazınızın geçici önbelleğinde (cache) tutulur.</p>
-            </div>
-            <div>
-                <h3 class="text-slate-900 font-bold mb-1">Erişim</h3>
-                <p>Uygulamayı kapattığınızda veya önbelleği temizlediğinizde verileriniz silinebilir.</p>
-            </div>
-            <div>
-                <h3 class="text-slate-900 font-bold mb-1">Altyapı</h3>
-                <p>ArAi, Google altyapısı ve Gemini teknolojileri kullanılarak geliştirilmiştir.</p>
-            </div>
-            <div class="pt-10 text-center opacity-30 text-[10px]">
-                Son Güncelleme: Şubat 2026
-            </div>
+            <p><strong>Veri Saklama:</strong> Sohbetleriniz sunucularda barındırılmaz, sadece cihazınızın geçici önbelleğinde (cache) tutulur.</p>
+            <p><strong>Erişim:</strong> Uygulamayı kapattığınızda veriler silinebilir. Kimse göremez.</p>
+            <p><strong>Altyapı:</strong> Uygulamamız, güvenli ve hızlı bir deneyim sunmak amacıyla <strong>Google altyapıları (Gemini API)</strong> ve teknolojileri kullanılarak geliştirilmiştir.</p>
+        </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="settings-panel" class="fixed inset-0 z-[60] bg-white transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+        <header class="flex items-center justify-between px-6 py-4 border-b">
+            <h2 class="text-xl font-bold">Ayarlar</h2>
+            <button onclick="closeSettings()" class="p-2 bg-slate-100 rounded-full">✕</button>
+        </header>
+        <div class="flex-1 p-6">
+            <button onclick="alert('Sistem Güncel')" class="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                <span>Güncellemeleri Denetle</span>
+                <span class="text-blue-600 font-bold text-xs">GÜNCEL</span>
+            </button>
         </div>
     </div>
 
     <script>
-        const BACKEND_URL = "https://chat-po6bup4n5q-uc-419259839186.us-central1.run.app"; 
+        const BACKEND_URL = "https://chat-po6bup4n5q-uc.a.run.app"; 
+        
         let chatHistory = [];
-        const MAX_HISTORY = 8;
-        const AI_SYSTEM_INSTRUCTION = `Senin adın ArAi. Türkçe konuşan zeki bir asistansın. Kısa cevap ver. Gizlilik sorularına "Aydınlatma Metnini gözden geçiriniz" de. Tarih/saat sormadıkça söyleme.`;
+        const MAX_HISTORY = 6;
 
-        // Klavye ve Ekran Boyutu Yönetimi
+        // --- ÖZGÜRLEŞTİRİLMİŞ TALİMAT ---
+        const AI_SYSTEM_INSTRUCTION = `
+        Senin adın ArAi. ArAi tarafından geliştirilen, son derece zeki, yardımsever ve doğal konuşan bir asistansın.
+        
+        DAVRANIŞ KURALLARI:
+        1. Kullanıcıyla doğal ve akıcı bir şekilde sohbet et.
+        2. Sorulan soruya göre cevabın uzunluğunu ayarla. Detaylı bilgi istenirse uzun ve kapsamlı anlat.
+        3. Kullanıcıya her zaman "Siz" diliyle hitap et.
+        4. "Ben bir yapay zekayım" gibi robotik girişler yapma, direkt konuya gir.
+        `;
+
+        // Klavye Fix
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', () => {
-                const container = document.getElementById('app-container');
-                container.style.height = `${window.visualViewport.height}px`;
+                document.getElementById('app-container').style.height = `${window.visualViewport.height}px`;
                 scrollToBottom();
             });
         }
 
-        function openSettings() { /* Ayarlar boş kalabilir */ }
         function openPrivacy() { document.getElementById('privacy-panel').classList.remove('translate-y-full'); }
         function closePrivacy() { document.getElementById('privacy-panel').classList.add('translate-y-full'); }
+        function openSettings() { document.getElementById('settings-panel').classList.remove('translate-x-full'); }
+        function closeSettings() { document.getElementById('settings-panel').classList.add('translate-x-full'); }
 
         function startChat() {
             document.getElementById('loading-overlay').classList.remove('hidden');
@@ -194,14 +184,12 @@
                 document.getElementById('chat-screen').classList.remove('hidden');
                 document.getElementById('chat-footer').classList.remove('hidden');
                 scrollToBottom();
-            }, 2500);
+            }, 1500);
         }
 
         function scrollToBottom() {
             const msgContainer = document.getElementById('chat-messages');
-            setTimeout(() => {
-                msgContainer.scrollTop = msgContainer.scrollHeight;
-            }, 50);
+            setTimeout(() => { msgContainer.scrollTop = msgContainer.scrollHeight; }, 100);
         }
 
         async function sendMessage() {
@@ -221,26 +209,37 @@
 
             try {
                 const historyStr = chatHistory.map(m => `${m.role}: ${m.content}`).join('\n');
+                
                 const res = await fetch(BACKEND_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: `${AI_SYSTEM_INSTRUCTION}\n\nGeçmiş:\n${historyStr}\n\nCevap ver:` })
+                    body: JSON.stringify({ message: `${AI_SYSTEM_INSTRUCTION}\n\nGEÇMİŞ SOHBET:\n${historyStr}\n\nKULLANICI SON MESAJI: ${text}` })
                 });
+
+                if (!res.ok) throw new Error("Sunucu Yanıt Vermedi");
+
                 const data = await res.json();
-                tEl.innerText = data.reply;
-                tEl.classList.remove('typing-indicator');
-                chatHistory.push({ role: 'ai', content: data.reply });
-                if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
-            } catch (e) {
-                tEl.innerText = "Bağlantı hatası.";
+                
+                if (data.reply) {
+                    tEl.innerText = data.reply;
+                    tEl.classList.remove('typing-indicator');
+                    chatHistory.push({ role: 'ai', content: data.reply });
+                    if (chatHistory.length > MAX_HISTORY) chatHistory.shift();
+                } else {
+                    tEl.innerText = "Yapay zeka boş yanıt döndürdü.";
+                }
+            } catch (e) { 
+                tEl.innerText = "Bağlantı hatası: Sunucuya ulaşılamıyor.";
+                console.error("Hata:", e);
             }
             scrollToBottom();
         }
 
         function appendMessage(text, sender, id = null) {
             const div = document.createElement('div');
-            div.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
-            div.innerHTML = `<div ${id ? `id="${id}"` : ''} class="max-w-[85%] p-3 px-4 rounded-2xl text-base ${sender === 'user' ? 'message-user' : 'message-ai'}">${text}</div>`;
+            div.className = `max-w-[85%] p-3 px-4 rounded-2xl text-base ${sender === 'user' ? 'message-user' : 'message-ai'}`;
+            if (id) div.id = id;
+            div.innerText = text;
             document.getElementById('chat-messages').appendChild(div);
         }
 
@@ -248,3 +247,5 @@
     </script>
 </body>
 </html>
+
+
